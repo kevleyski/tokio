@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/tokio/0.3.0")]
+#![doc(html_root_url = "https://docs.rs/tokio/0.3.3")]
 #![allow(
     clippy::cognitive_complexity,
     clippy::large_enum_variant,
@@ -57,7 +57,7 @@
 //! enabling the `full` feature flag:
 //!
 //! ```toml
-//! tokio = { version = "0.2", features = ["full"] }
+//! tokio = { version = "0.3", features = ["full"] }
 //! ```
 //!
 //! ### Authoring applications
@@ -72,7 +72,7 @@
 //! This example shows the quickest way to get started with Tokio.
 //!
 //! ```toml
-//! tokio = { version = "0.2", features = ["full"] }
+//! tokio = { version = "0.3", features = ["full"] }
 //! ```
 //!
 //! ### Authoring libraries
@@ -88,7 +88,7 @@
 //! needs to `tokio::spawn` and use a `TcpStream`.
 //!
 //! ```toml
-//! tokio = { version = "0.2", features = ["rt", "net"] }
+//! tokio = { version = "0.3", features = ["rt", "net"] }
 //! ```
 //!
 //! ## Working With Tasks
@@ -305,7 +305,8 @@
 //! - `rt-multi-thread`: Enables the heavier, multi-threaded, work-stealing scheduler.
 //! - `io-util`: Enables the IO based `Ext` traits.
 //! - `io-std`: Enable `Stdout`, `Stdin` and `Stderr` types.
-//! - `net`: Enables `tokio::net` types such as `TcpStream`, `UnixStream` and `UdpSocket`.
+//! - `net`: Enables `tokio::net` types such as `TcpStream`, `UnixStream` and `UdpSocket`,
+//!          as well as (on Unix-like systems) `AsyncFd`
 //! - `time`: Enables `tokio::time` types and allows the schedulers to enable
 //!           the built in timer.
 //! - `process`: Enables `tokio::process` types.

@@ -1,3 +1,49 @@
+# 0.3.3 (November 2, 2020)
+
+Fixes a soundness hole by adding a missing `Send` bound to
+`Runtime::spawn_blocking()`.
+
+### Fixed
+- rt: include missing `Send`, fixing soundness hole (#3089).
+- tracing: avoid huge trace span names (#3074).
+
+### Added
+- net: `TcpSocket::reuseport()`, `TcpSocket::set_reuseport()` (#3083).
+- net: `TcpSocket::reuseaddr()` (#3093).
+- net: `TcpSocket::local_addr()` (#3093).
+- net: add pid to `UCred` (#2633).
+
+# 0.3.2 (October 27, 2020)
+
+Adds `AsyncFd` as a replacement for v0.2's `PollEvented`.
+
+### Fixed
+- io: fix a potential deadlock when shutting down the I/O driver (#2903).
+- sync: `RwLockWriteGuard::downgrade()` bug (#2957).
+
+### Added
+- io: `AsyncFd` for receiving readiness events on raw FDs (#2903).
+- net: `poll_*` function on `UdpSocket` (#2981).
+- net: `UdpSocket::take_error()` (#3051).
+- sync: `oneshot::Sender::poll_closed()` (#3032).
+
+# 0.3.1 (October 21, 2020)
+
+This release fixes an use-after-free in the IO driver. Additionally, the `read_buf`
+and `write_buf` methods have been added back to the IO traits, as the bytes crate
+is now on track to reach version 1.0 together with Tokio.
+
+### Fixed
+- net: fix use-after-free (#3019).
+- fs: ensure buffered data is written on shutdown (#3009).
+
+### Added
+- io: `copy_buf()` (#2884).
+- io: `AsyncReadExt::read_buf()`, `AsyncReadExt::write_buf()` for working with
+  `Buf`/`BufMut` (#3003).
+- rt: `Runtime::spawn_blocking()` (#2980).
+- sync: `watch::Sender::is_closed()` (#2991).
+
 # 0.3.0 (October 15, 2020)
 
 This represents a 1.0 beta release. APIs are polished and future-proofed. APIs
@@ -35,6 +81,7 @@ Biggest changes are:
 - fs: `File` operations take `&self` (#2930).
 - rt: runtime API, and `#[tokio::main]` macro polish (#2876)
 - rt: `Runtime::enter` uses an RAII guard instead of a closure (#2954).
+- net: the `from_std` function on all sockets no longer sets socket into non-blocking mode (#2893)
 
 ### Added
 - sync: `map` function to lock guards (#2445).

@@ -104,23 +104,11 @@ cfg_rt_multi_thread! {
 /// # Ok(())
 /// # }
 /// ```
+#[cfg_attr(tokio_track_caller, track_caller)]
 pub fn spawn_blocking<F, R>(f: F) -> JoinHandle<R>
 where
     F: FnOnce() -> R + Send + 'static,
     R: Send + 'static,
 {
-    #[cfg(feature = "tracing")]
-    let f = {
-        let span = tracing::trace_span!(
-            target: "tokio::task",
-            "task",
-            kind = %"blocking",
-            function = %std::any::type_name::<F>(),
-        );
-        move || {
-            let _g = span.enter();
-            f()
-        }
-    };
     crate::runtime::spawn_blocking(f)
 }

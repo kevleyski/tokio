@@ -132,7 +132,7 @@
 //!
 //! The current-thread scheduler provides a _single-threaded_ future executor.
 //! All tasks will be created and executed on the current thread. This requires
-//! the `rt-core` feature flag.
+//! the `rt` feature flag.
 //! ```
 //! use tokio::runtime;
 //!
@@ -286,7 +286,6 @@ cfg_rt! {
     #[derive(Debug)]
     enum Kind {
         /// Execute all tasks on the current-thread.
-        #[cfg(feature = "rt")]
         CurrentThread(BasicScheduler<driver::Driver>),
 
         /// Execute tasks across multiple threads.
@@ -358,17 +357,44 @@ cfg_rt! {
         /// });
         /// # }
         /// ```
-        #[cfg(feature = "rt")]
+        #[cfg_attr(tokio_track_caller, track_caller)]
         pub fn spawn<F>(&self, future: F) -> JoinHandle<F::Output>
         where
             F: Future + Send + 'static,
             F::Output: Send + 'static,
         {
+            #[cfg(feature = "tracing")]
+            let future = crate::util::trace::task(future, "task");
             match &self.kind {
                 #[cfg(feature = "rt-multi-thread")]
                 Kind::ThreadPool(exec) => exec.spawn(future),
                 Kind::CurrentThread(exec) => exec.spawn(future),
             }
+        }
+
+        /// Run the provided function on an executor dedicated to blocking operations.
+        ///
+        /// # Examples
+        ///
+        /// ```
+        /// use tokio::runtime::Runtime;
+        ///
+        /// # fn dox() {
+        /// // Create the runtime
+        /// let rt = Runtime::new().unwrap();
+        ///
+        /// // Spawn a blocking function onto the runtime
+        /// rt.spawn_blocking(|| {
+        ///     println!("now running on a worker thread");
+        /// });
+        /// # }
+        #[cfg_attr(tokio_track_caller, track_caller)]
+        pub fn spawn_blocking<F, R>(&self, func: F) -> JoinHandle<R>
+        where
+            F: FnOnce() -> R + Send + 'static,
+            R: Send + 'static,
+        {
+            self.handle.spawn_blocking(func)
         }
 
         /// Run a future to completion on the Tokio runtime. This is the
@@ -394,7 +420,7 @@ cfg_rt! {
         ///
         /// # Panics
         ///
-        /// This function panics if the provided future panics, or if not called within an
+        /// This function panics if the provided future panics, or if called within an
         /// asynchronous execution context.
         ///
         /// # Examples
@@ -416,7 +442,6 @@ cfg_rt! {
             let _enter = self.enter();
 
             match &self.kind {
-                #[cfg(feature = "rt")]
                 Kind::CurrentThread(exec) => exec.block_on(future),
                 #[cfg(feature = "rt-multi-thread")]
                 Kind::ThreadPool(exec) => exec.block_on(future),

@@ -207,11 +207,21 @@ pub use std::io::{Error, ErrorKind, Result, SeekFrom};
 cfg_io_driver! {
     pub(crate) mod driver;
 
+    mod registration;
+
     mod poll_evented;
+
     #[cfg(not(loom))]
     pub(crate) use poll_evented::PollEvented;
+}
 
-    mod registration;
+cfg_net_unix! {
+    mod async_fd;
+
+    pub mod unix {
+        //! Asynchronous IO structures specific to Unix-like operating systems.
+        pub use super::async_fd::{AsyncFd, AsyncFdReadyGuard};
+    }
 }
 
 cfg_io_std! {
@@ -232,10 +242,9 @@ cfg_io_util! {
     pub use split::{split, ReadHalf, WriteHalf};
 
     pub(crate) mod seek;
-
     pub(crate) mod util;
     pub use util::{
-        copy, duplex, empty, repeat, sink, AsyncBufReadExt, AsyncReadExt, AsyncSeekExt, AsyncWriteExt,
+        copy, copy_buf, duplex, empty, repeat, sink, AsyncBufReadExt, AsyncReadExt, AsyncSeekExt, AsyncWriteExt,
         BufReader, BufStream, BufWriter, DuplexStream, Empty, Lines, Repeat, Sink, Split, Take,
     };
 }

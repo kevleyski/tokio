@@ -569,19 +569,7 @@ impl<T> Sender<T> {
     /// ```
     pub fn subscribe(&self) -> Receiver<T> {
         let shared = self.shared.clone();
-
-        let mut tail = shared.tail.lock();
-
-        if tail.rx_cnt == MAX_RECEIVERS {
-            panic!("max receivers");
-        }
-
-        tail.rx_cnt = tail.rx_cnt.checked_add(1).expect("overflow");
-        let next = tail.pos;
-
-        drop(tail);
-
-        Receiver { shared, next }
+        new_receiver(shared)
     }
 
     /// Returns the number of active receivers
@@ -669,6 +657,22 @@ impl<T> Sender<T> {
 
         Ok(rem)
     }
+}
+
+fn new_receiver<T>(shared: Arc<Shared<T>>) -> Receiver<T> {
+    let mut tail = shared.tail.lock();
+
+    if tail.rx_cnt == MAX_RECEIVERS {
+        panic!("max receivers");
+    }
+
+    tail.rx_cnt = tail.rx_cnt.checked_add(1).expect("overflow");
+
+    let next = tail.pos;
+
+    drop(tail);
+
+    Receiver { shared, next }
 }
 
 impl Tail {
